@@ -1,5 +1,5 @@
 import express from 'express';
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { CallbackError, Schema } from 'mongoose';
 
 const subtaskSchema = new Schema({
 	text: { type: String, required: true }
@@ -26,10 +26,22 @@ var router = express.Router();
 
 //전체 리스트 받기
 router.get('/', (req,res) => {
+	Todo.find((err,docs)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send(docs);
+	})
 });
 
 //컬럼 타이틀 갱신
 router.post('/:id/column', (req,res) => {
+	Todo.updateOne({ _id: req.params.id }, { $set:{title: req.body['title']} }, {new: true},(err,result)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send({});
+	});
 });
 //컬럼 추가
 router.put('/column', (req,res) => {
@@ -38,16 +50,21 @@ router.put('/column', (req,res) => {
 		_id: new mongoose.Types.ObjectId(),
 		title:title
 	});
-	console.log(todo)
 	todo.save().then((result) => {
-		console.log('Saved successfully');
-		console.log(result);
-		res.send({id:result._id,full_result:result});
+		console.log(result.get('title'))
+		res.send({id:result._id,new_title:result.get('title')});
 	});
 	
 });
 //컬럼 삭제
 router.delete('/:id/column', (req,res) => {
+	console.log(req.params.id)
+	Todo.remove({ _id: req.params.id }, (err: CallbackError) => {
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		res.send({})
+	});
 });
 
 //카드 내용 수정

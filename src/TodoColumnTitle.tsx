@@ -1,9 +1,11 @@
 import React from 'react';
 import './App.css';
 import onClickOutside from "react-onclickoutside";
+import { API } from './urls';
 
 interface Prop{
 	text:string;
+	id:string;
 }
 interface State{
 	title:string;
@@ -16,23 +18,30 @@ class TodoColumnTitle extends React.Component<Prop,State>{
 		super(props);
 		this.state= {title:props.text, edit_mode:false};
 	}
+
+	fetchUpdateTitle(title:string){
+		fetch(`${API}/todo/${this.props.id}/column`,{
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body:JSON.stringify({title:title}),
+			method:"POST"
+		}).then(response=>{
+			return response.json()
+		}).then(response=>{
+		})
+	}
+
 	handleClickOutside = () => {
 		var title = this.state.title;
 		if(this.title_input_ref){
 			if(this.state.title !== this.title_input_ref.value){
-				fetch(`api/todo/column`,{
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					method: "PUT",
-					body: JSON.stringify({title:this.title_input_ref.value})
-				})
+				this.fetchUpdateTitle(this.title_input_ref.value)
 				title = this.title_input_ref.value
 			}
 		}
 		this.setState({edit_mode:false,title:title});
-		
 	};
 	render(){
 		return(
