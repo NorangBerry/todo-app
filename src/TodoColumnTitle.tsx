@@ -19,6 +19,12 @@ class TodoColumnTitle extends React.Component<Prop,State>{
 		this.state= {title:props.text, edit_mode:false};
 	}
 
+	componentDidUpdate(){
+		if(this.state.edit_mode && this.title_input_ref){
+			this.title_input_ref.focus();
+		}
+	}
+
 	fetchUpdateTitle(title:string){
 		fetch(`${API}/todo/${this.props.id}/column`,{
 			headers: {

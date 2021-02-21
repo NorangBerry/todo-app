@@ -21,7 +21,6 @@ const todoSchema = new Schema({
 // Create Model & Export
 const Todo = mongoose.model('Todo', todoSchema);
 
-
 var router = express.Router();
 
 //전체 리스트 받기
@@ -68,13 +67,49 @@ router.delete('/:id/column', (req,res) => {
 });
 
 //카드 내용 수정
-router.post('/:column_id/:id/card', (req,res) => {
+router.post('/card', (req,res) => {
+	Todo.updateOne({ _id: req.body['column_id'], "cards._id" : req.body['id'] },
+	{ "$set": { "cards.$.text": req.body['text'] } },
+	{upsert: true},(err,result)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send({});
+	});
+});
+//카드 완료
+router.post('/card/complete', (req,res) => {
+	Todo.updateOne({ _id: req.body['column_id'], "cards._id" : req.body['id'] },
+	{ "$set": { "cards.$.complete": req.body['complete'] } },
+	{upsert: true},(err,result)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send({});
+	});
 });
 //카드 추가
 router.put('/:column_id/card', (req,res) => {
+	const card = {
+		text: req.body['text']
+	}
+	Todo.updateOne({ _id: req.params.column_id }, { $push:{cards: card} }, {upsert: true},(err,result)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send({});
+	});
 });
 //카드 삭제
-router.delete('/:column_id/:id/card', (req,res) => {
+router.delete('/card', (req,res) => {
+	Todo.updateOne({ _id: req.body['column_id'],  },
+	{ "$pull": { cards : {_id:req.body['id']} } },
+	{new: true},(err,result)=>{
+		if(err){
+			return res.status(500).json({ error: "database failure" }).send();
+		}
+		return res.send({});
+	});
 });
 
 export default router;

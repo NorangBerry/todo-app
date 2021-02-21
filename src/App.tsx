@@ -5,10 +5,12 @@ import TodoBoard from './TodoBoard';
 
 function App() {
   return (
-    <div style={{backgroundColor:"rgb(75, 191, 107)", height:"100%"}}>
+	<div style={{backgroundColor:"rgb(75, 191, 107)",height:"100%", overflow:"scroll", display:"block"}}>
 		<Header/>
-		<TodoBoard/>
-    </div>
+		<div className="d-flex flex-column" style={{marginTop:"40px"}}>
+			<TodoBoard/>
+		</div>
+	</div>
   );
 }
 
